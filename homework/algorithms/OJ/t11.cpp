@@ -4,15 +4,11 @@
 using namespace std;
 
 int base = 1337;
-// 计算 a 的 k 次方然后与 base 求模的结果
-int mypow(int a, int k) {
-    // 对因子求模
+int basepow(int a, int k) { // 这里 k < 10 
     a %= base;
     int res = 1;
-    for (int _ = 0; _ < k; _++) {
-        // 这里有乘法，是潜在的溢出点
+    for (int i = 0; i < k; i++) {
         res *= a;
-        // 对乘法结果求模
         res %= base;
     }
     return res;
@@ -23,8 +19,8 @@ int superPow(int a, vector<int>& b) {
     int last = b.back();
     b.pop_back();
     
-    int part1 = mypow(a, last);
-    int part2 = mypow(superPow(a, b), 10);
+    int part1 = basepow(a, last);
+    int part2 = basepow(superPow(a, b), 10);
     // 每次乘法都要求模
     return (part1 * part2) % base;
 }
@@ -34,8 +30,8 @@ int main(){
     vector<int> b; 
     string str; 
     cin>>a; 
+    getchar();
     getline(cin, str);
-    cout<<str; 
     for(auto iter=str.begin(); iter!=str.end(); iter++){
         if(isdigit(*(iter))){
             tmp = (int) (*(iter) - '0');

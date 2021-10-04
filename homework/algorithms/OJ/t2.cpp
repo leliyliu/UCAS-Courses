@@ -3,34 +3,40 @@
 using namespace std;
 
 int minbinsearch(vector<int> &nums, int target, int l, int r){
-    if(l>r) 
-            return -1;
+    bool end = (l>r);
+    if(end) 
+        return -1;
     int mid;
     while(l<r){
         mid = (l+r)>>1;
-        if(nums[mid] < target)
+        bool less = (nums[mid] < target);
+        if(less)
             l = mid+1; 
         else 
             r = mid;
     }
-    if(nums[l] == target)
+    bool equal = (nums[l] == target);
+    if(equal)
         return l;
     else
         return -1;
 }
 
 int maxbinsearch(vector<int> &nums, int target, int l, int r){
-    if(l>r) 
-            return -1;
+    bool end = (l>r);
+    if(end) 
+        return -1;
     int mid; 
     while(l<r){
         mid = (l+r+1)>>1;
-        if(nums[mid] > target)
+        bool more = (nums[mid] > target);
+        if(more)
             r = mid-1;
         else
             l = mid;
     }
-    if(nums[r] == target)
+    bool equal = (nums[r] == target);
+    if(equal)
         return r;
     else
         return -1;
@@ -47,7 +53,8 @@ int main(){
     for(int i=0; i<m; i++){
         cin>>target;
         left = minbinsearch(nums, target, 0, n-1);
-        if(left == -1)
+        bool equal = (left == -1);
+        if(equal)
             right = -1;
         else
             right = maxbinsearch(nums, target, 0, n-1);
@@ -55,10 +62,7 @@ int main(){
         rights.push_back(right);
     } 
     for(int i=0; i<m; i++){
-        if(i!=m-1)
-            cout << lefts[i] << ' ' << rights[i] << endl; 
-        else
-            cout << lefts[i] << ' ' << rights[i];
+        cout << lefts[i] << ' ' << rights[i] << endl; 
     }
     return 0;
 }
