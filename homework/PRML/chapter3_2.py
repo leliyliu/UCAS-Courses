@@ -1,18 +1,16 @@
 import numpy as np 
-# 这题有问题！！！！
 
 C = 1 
-W = np.array([0,0,0]) # 初始化 W 为 [0,1,1] (3,1)
+W = np.array([0,0,0,0]) # 初始化 W 为 [0,1,1] (3,1)
 w1 = np.array([[0,0,0], [1,0,0], [1,0,1], [1,1,0]]) # (4,3)
 w2 = np.array([[0,0,1], [0,1,1], [0,1,0], [1,1,1]])
+b1 = np.ones((w1.shape[0],1)).astype(np.int32)
+b2 = np.ones((w2.shape[0],1)).astype(np.int32)
+w1 = np.c_[w1, b1]
+w2 = np.c_[w2, b2]
 w2 = -w2 
 n1 = len(w1)
 n2 = len(w2)
-# tmp1 = np.dot(w1, W)
-# judge = tmp1.sum(axis=1) <= 0 # 是否要进行更新
-# print(tmp1)
-# judge = tmp1 <= 0
-# print(np.dot(w1.transpose(),judge))
 
 flag = True # 是否需要继续计算
 m = 0
@@ -31,7 +29,7 @@ while(flag):
         y2 = (x2*W).sum()
         if(y2<=0):
             flag = True
-            W += C*x1
+            W += C*x2
 
 print(W)
 
