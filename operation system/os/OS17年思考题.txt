@@ -1,0 +1,149 @@
+1.为什么开始启动计算机的时候，执行的是BIOS代码而不是操作系统自身的代码？
+
+2.为什么BIOS只加载了一个扇区，后续扇区却是由bootsect代码加载？为什么BIOS没有直接把所有需要加载的扇区都加载？
+
+3.为什么BIOS把bootsect加载到0x07c00，而不是0x00000？加载后又马上挪到0x90000处，是何道理？为什么不一次加载到位？
+
+4.bootsect、setup、head程序之间是怎么衔接的？给出代码证据。
+
+5.setup程序的最后是jmpi 0,8 ，为什么这个8不能简单的当作阿拉伯数字8看待，究竟有什么内涵？
+
+6.保护模式在“保护”什么？它的“保护”体现在哪里？特权级的目的和意义是什么？分页有“保护”作用吗？
+
+7.在setup程序里曾经设置过gdt，为什么在head程序中将其废弃，又重新设置了一个？为什么设置两次，而不是一次搞好？
+
+8.进程0的task_struct在哪？具体内容是什么？
+
+9.内核的线性地址空间是如何分页的？画出从0x000000开始的7个页（包括页目录表、页表所在页）的挂接关系图，就是页目录表的前四个页目录项、第一个个页表的前7个页表项指向什么位置？给出代码证据。
+
+10.在head程序执行结束的时候，在idt的前面有184个字节的head程序的剩余代码，剩余了什么？为什么要剩余？
+
+11.为什么不用call，而是用ret“调用”main函数？画出调用路线图，给出代码证据。
+
+12.用文字和图说明中断描述符表是如何初始化的，可以举例说明（比如：set_trap_gate(0,&divide_error)），并给出代码证据。
+
+13.在IA-32中，有大约20多个指令是只能在0特权级下使用，其他的指令，比如cli，并没有这个约定。奇怪的是，在Linux0.11中，3特权级的进程代码并不能使用cli指令，这是为什么？请解释并给出代码证据。
+
+14.进程0的task_struct在哪？具体内容是什么？给出代码证据。
+
+15.在system.h里
+#define _set_gate(gate_addr,type,dpl,addr) \
+__asm__ ("movw %%dx,%%ax\n\t" \
+	"movw %0,%%dx\n\t" \
+	"movl %%eax,%1\n\t" \
+	"movl %%edx,%2" \
+	: \
+	: "i" ((short) (0x8000+(dpl<<13)+(type<<8))), \
+	"o" (*((char *) (gate_addr))), \
+	"o" (*(4+(char *) (gate_addr))), \
+	"d" ((char *) (addr)),"a" (0x00080000))
+
+#define set_intr_gate(n,addr) \
+	_set_gate(&idt[n],14,0,addr)
+
+#define set_trap_gate(n,addr) \
+	_set_gate(&idt[n],15,0,addr)
+
+#define set_system_gate(n,addr) \
+	_set_gate(&idt[n],15,3,addr)
+这里中断门、陷阱门、系统调用都是通过_set_gate设置的，用的是同一个嵌入汇编代码，比较明显的差别是dpl一个是3，另外两个是0，这是为什么？说明理由。
+
+16.进程0 fork进程1之前，为什么先调用move_to_user_mode()？用的是什么方法？解释其中的道理。
+
+17.在Linux操作系统中大量使用了中断、异常类的处理，究竟有什么好处？
+
+18.copy_process函数的参数最后五项是：long eip,long cs,long eflags,long esp,long ss。查看栈结构确实有这五个参数，奇怪的是其他参数的压栈代码都能找得到，确找不到这五个参数的压栈代码，反汇编代码中也查不到，请解释原因。
+
+19.分析get_free_page()函数的代码，叙述在主内存中获取一个空闲页的技术路线。
+
+20.分析copy_page_tables（）函数的代码，叙述父进程如何为子进程复制页表。
+
+21.进程0创建进程1时，为进程1建立了task_struct及内核栈，第一个页表，分别位于物理内存16MB顶端倒数第一页、第二页。请问，这两个页究竟占用的是谁的线性地址空间，内核、进程0、进程1、还是没有占用任何线性地址空间？说明理由（可以图示）并给出代码证据。
+
+22.假设：经过一段时间的运行，操作系统中已经有5个进程在运行，且内核分别为进程4、进程5分别创建了第一个页表，这两个页表在谁的线性地址空间？用图表示这两个页表在线性地址空间和物理地址空间的映射关系。
+
+23.#define switch_to(n) {\
+struct {long a,b;} __tmp; \
+__asm__("cmpl %%ecx,_current\n\t" \
+	"je 1f\n\t" \
+	"movw %%dx,%1\n\t" \
+	"xchgl %%ecx,_current\n\t" \
+	"ljmp %0\n\t" \
+	"cmpl %%ecx,_last_task_used_math\n\t" \
+	"jne 1f\n\t" \
+	"clts\n" \
+	"1:" \
+	::"m" (*&__tmp.a),"m" (*&__tmp.b), \
+	"d" (_TSS(n)),"c" ((long) task[n])); \
+}
+代码中的"ljmp %0\n\t" 很奇怪，按理说jmp指令跳转到得位置应该是一条指令的地址，可是这行代码却跳到了"m" (*&__tmp.a)，这明明是一个数据的地址，更奇怪的，这行代码竟然能正确执行。请论述其中的道理。
+
+24.进程0开始创建进程1，调用fork（），跟踪代码时我们发现，fork代码执行了两次，第一次，执行fork代码后，跳过init（）直接执行了for(;;) pause()，第二次执行fork代码后，执行了init（）。奇怪的是，我们在代码中并没有看到向转向fork的goto语句，也没有看到循环语句，是什么原因导致fork反复执行？请说明理由（可以图示），并给出代码证据。
+
+25、打开保护模式、分页后，线性地址到物理地址是如何转换的？
+
+26、getblk函数中，申请空闲缓冲块的标准就是b_count为0，而申请到之后，为什么在wait_on_buffer(bh)后又执行if（bh->b_count）来判断b_count是否为0？
+
+27、b_dirt已经被置为1的缓冲块，同步前能够被进程继续读、写？给出代码证据。
+
+28、分析panic函数的源代码，根据你学过的操作系统知识，完整、准确的判断panic函数所起的作用。假如操作系统设计为支持内核进程（始终运行在0特权级的进程），你将如何改进panic函数？
+
+29、详细分析进程调度的全过程。考虑所有可能（signal、alarm除外）
+
+30、wait_on_buffer函数中为什么不用if（）而是用while（）？
+
+31、操作系统如何利用b_uptodate保证缓冲块数据的正确性？new_block (int dev)函数新申请一个缓冲块后，并没有读盘，b_uptodate却被置1，是否会引起数据混乱？详细分析理由。
+
+32、add_reques（）函数中有下列代码
+	if (!(tmp = dev->current_request)) {
+		dev->current_request = req;
+		sti();
+		(dev->request_fn)();
+		return;
+	}
+其中的
+	if (!(tmp = dev->current_request)) {
+		dev->current_request = req;
+是什么意思？
+
+33、do_hd_request()函数中dev的含义始终一样吗？
+
+34、read_intr（）函数中，下列代码是什么意思？为什么这样做？
+	if (--CURRENT->nr_sectors) {
+		do_hd = &read_intr;
+		return;
+	}
+
+35、bread（）函数代码中为什么要做第二次if (bh->b_uptodate)判断？
+	if (bh->b_uptodate)
+		return bh;
+	ll_rw_block(READ,bh);
+	wait_on_buffer(bh);
+	if (bh->b_uptodate)
+		return bh;
+
+36、getblk（）函数中，两次调用wait_on_buffer（）函数，两次的意思一样吗？
+
+37、getblk（）函数中
+	do {
+		if (tmp->b_count)
+			continue;
+		if (!bh || BADNESS(tmp)<BADNESS(bh)) {
+			bh = tmp;
+			if (!BADNESS(tmp))
+				break;
+		}
+/* and repeat until we find something good */
+	} while ((tmp = tmp->b_next_free) != free_list);
+说明什么情况下执行continue、break。
+
+38、make_request（）函数	
+	if (req < request) {
+		if (rw_ahead) {
+			unlock_buffer(bh);
+			return;
+		}
+		sleep_on(&wait_for_request);
+		goto repeat;
+
+其中的sleep_on(&wait_for_request)是谁在等？等什么？
