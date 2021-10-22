@@ -15,3 +15,4 @@ x = (np.dot(m,n))
 et = (np.dot(A.T, x) - b) 
 error = np.dot(et.T, et)
 print('error is {}'.format(error))
+
