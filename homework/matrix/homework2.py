@@ -30,7 +30,7 @@ def PLUinv(A):
     ULinv = matmul(Uinv, Linv)
     return matmul(ULinv, P)
 
-def lowertrinv(L): # 由于L 矩阵的对角线元素均为1， 所以直接利用其来实现约减
+def lowertrinv(L): # 由于L矩阵的对角线元素均为1， 所以直接利用其来实现约减
     N = L.shape[0]
     Linv = np.eye(N)
     for i in range(N-1):
@@ -39,8 +39,7 @@ def lowertrinv(L): # 由于L 矩阵的对角线元素均为1， 所以直接利�
     
     return Linv
 
-
-def uppertrinv(U): # 由于U 的对角元素并不为1， 所以要先做归一化处理
+def uppertrinv(U): # 由于U的对角元素并不为1， 所以要先做归一化处理
     N = U.shape[0]
     Uinv = np.eye(N)
     for i in range(N):
