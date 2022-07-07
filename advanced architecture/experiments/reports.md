@@ -428,4 +428,12 @@ synth,floorplan,tapcell,pdn,gplace,resize,dplace,cts,filler,groute,droute,layout
 
 得到`uart`在asap7 工艺库下的版图为： 
 
-![image-20220420195928030](upload\image-20220420195928030.png)
+![image-20220427162431228](upload/image-20220427162431228.png)
+
+
+
+## 打包Dockerfile 
+
+本实验在docker 环境下完成， 最终，我们将docker 容器打包成镜像，并上传到docker hub， 以便于不同环境之间的快速移植。 具体 镜像请参见 [leliyliu/iflow](https://hub.docker.com/repository/docker/leliyliu/iflow)
+
+在整个提交的报告中，包含了中间生成的结果，在文件夹`result` 中，并且，将所生成的gsd 文件全部打包到`gds`文件夹中。
